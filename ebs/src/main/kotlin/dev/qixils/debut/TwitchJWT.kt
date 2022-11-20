@@ -1,12 +1,9 @@
-@file:OptIn(ExperimentalSerializationApi::class)
-
 package dev.qixils.debut
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.interfaces.Payload
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
-import kotlinx.serialization.*
 import java.util.*
 
 enum class Role(
@@ -27,10 +24,10 @@ enum class Role(
 data class PubsubPerms
 @JsonCreator constructor(
 
-    @JsonProperty("send", required = false)
+    @param:JsonProperty("send", required = false)
     val send: List<String>? = null,
 
-    @JsonProperty("listen", required = false)
+    @param:JsonProperty("listen", required = false)
     val listen: List<String>? = null,
 ) {
     fun asMap(): Map<String, List<String>> {
@@ -66,7 +63,7 @@ data class TwitchIncomingJWT(
 
 data class TwitchOutgoingJWT(
     val exp: Date,
-    val userId: Int,
+    val userId: String,
     val channel_id: String? = null, // this is numeric
     val pubsubPerms: PubsubPerms? = null,
 ) {
