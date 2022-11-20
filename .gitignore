@@ -1,6 +1,6 @@
 ### JetBrains ###
 *.iml
-.idea/
+/.idea/
 
 ### VS Code ###
 .vscode/
