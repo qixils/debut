@@ -1,5 +1,3 @@
-const daisyui = require("daisyui");
-
 const config = {
   content: ["./src/**/*.{html,js,svelte,ts}"],
 
@@ -7,7 +5,7 @@ const config = {
     extend: {},
   },
 
-  plugins: [daisyui],
+  plugins: [],
 };
 
 module.exports = config;
