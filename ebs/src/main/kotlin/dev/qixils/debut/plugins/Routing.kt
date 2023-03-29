@@ -17,6 +17,8 @@ import io.ktor.server.routing.*
 import java.time.Instant
 import java.util.*
 
+// TODO: use custom response classes for better auto generated OpenAPI docs
+
 // state
 
 val polls: MutableMap<Long, Poll> = mutableMapOf() // key is the streamer id
@@ -122,12 +124,12 @@ fun Application.configureRouting() {
                     call.respond(HttpStatusCode.OK, poll.status(payload.opaqueUserId))
                 }
 
-                put<PollAPI.Status> {
+                get<PollAPI.Status> {
                     // load poll
                     val (payload, poll) = loadPoll(call)
                     if (poll == null) {
                         call.respond(HttpStatusCode.NotFound, mapOf("error" to "No poll is active"))
-                        return@put
+                        return@get
                     }
                     // respond
                     call.respond(HttpStatusCode.OK, poll.status(payload.opaqueUserId))
