@@ -1,5 +1,7 @@
 package dev.qixils.debut
 
+import kotlinx.serialization.Serializable
+
 data class Poll(
     val question: String,
     val options: List<String>,
@@ -26,15 +28,32 @@ data class Poll(
         active = false
     }
 
-    fun status(requester: String): Map<String, *> {
-        return mapOf(
-            "question" to question,
-            "options" to options,
-            "tallies" to votes.values.groupingBy { it }.eachCount(),
-            "totalVotes" to votes.size,
-            "winner" to winner,
-            "active" to active,
-            "hasVoted" to votes.containsKey(requester),
+    fun status(requester: String): PollStatus {
+        return PollStatus(
+            question,
+            options.mapIndexed { index, option ->
+                Option(option, votes.values.count { it == index })
+            },
+            votes.size,
+            winner,
+            active,
+            votes.containsKey(requester),
         )
     }
 }
+
+@Serializable
+data class Option(
+    val value: String,
+    val votes: Int,
+)
+
+@Serializable
+data class PollStatus(
+    val question: String,
+    val options: List<Option>,
+    val totalVotes: Int,
+    val winner: String?,
+    val active: Boolean,
+    val hasVoted: Boolean,
+)

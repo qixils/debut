@@ -16,10 +16,10 @@
         votePercents = votePercents; // svelte shenanigans
     }
 
-    function handleClick(optionValue: string) {
+    function handleClick(optionIndex: number) {
         if (disabled) return;
-        const option = options.find(option => option.value === optionValue);
-        if (!option) return;
+        if (optionIndex < 0 || optionIndex >= options.length) return;
+        const option = options[optionIndex];
         option.votes++;
         updateVotePercents();
         disabled = true;

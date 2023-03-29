@@ -17,8 +17,6 @@ import io.ktor.server.routing.*
 import java.time.Instant
 import java.util.*
 
-// TODO: use custom response classes for better auto generated OpenAPI docs
-
 // state
 
 val polls: MutableMap<Long, Poll> = mutableMapOf() // key is the streamer id
@@ -63,7 +61,7 @@ fun Application.configureRouting() {
                     val payload = TwitchIncomingJWT.from(principal.payload)
                     // ignore if user is not a moderator
                     if (!payload.role.isModerator) {
-                        call.respond(HttpStatusCode.Forbidden, mapOf("error" to "Only moderators can create polls"))
+                        call.respond(HttpStatusCode.Forbidden, ErrorResponse("Only moderators can create polls"))
                         return@put
                     }
                     // create & save poll
@@ -83,14 +81,14 @@ fun Application.configureRouting() {
                     // load poll
                     val (payload, poll) = loadPoll(call)
                     if (poll == null) {
-                        call.respond(HttpStatusCode.NotFound, mapOf("error" to "No poll is active"))
+                        call.respond(HttpStatusCode.NotFound, ErrorResponse("No poll is active"))
                         return@put
                     }
                     // record vote
                     try {
                         poll.vote(payload.opaqueUserId, it.option)
                     } catch (ex: IllegalStateException) {
-                        call.respond(HttpStatusCode.BadRequest, mapOf("error" to ex.message))
+                        call.respond(HttpStatusCode.BadRequest, ErrorResponse(ex))
                         return@put
                     }
                     // respond
@@ -101,19 +99,19 @@ fun Application.configureRouting() {
                     // load poll
                     val (payload, poll) = loadPoll(call)
                     if (poll == null) {
-                        call.respond(HttpStatusCode.NotFound, mapOf("error" to "No poll is active"))
+                        call.respond(HttpStatusCode.NotFound, ErrorResponse("No poll is active"))
                         return@put
                     }
                     // ignore if user is not a moderator
                     if (!payload.role.isModerator) {
-                        call.respond(HttpStatusCode.Forbidden, mapOf("error" to "Only moderators can close polls"))
+                        call.respond(HttpStatusCode.Forbidden, ErrorResponse("Only moderators can close polls"))
                         return@put
                     }
                     // close poll
                     try {
                         poll.close()
                     } catch (ex: IllegalStateException) {
-                        call.respond(HttpStatusCode.BadRequest, mapOf("error" to ex.message))
+                        call.respond(HttpStatusCode.BadRequest, ErrorResponse(ex))
                         return@put
                     }
                     // publish closure to twitch
@@ -128,7 +126,7 @@ fun Application.configureRouting() {
                     // load poll
                     val (payload, poll) = loadPoll(call)
                     if (poll == null) {
-                        call.respond(HttpStatusCode.NotFound, mapOf("error" to "No poll is active"))
+                        call.respond(HttpStatusCode.NotFound, ErrorResponse("No poll is active"))
                         return@get
                     }
                     // respond
