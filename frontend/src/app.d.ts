@@ -9,16 +9,20 @@ declare global {
 
 export {};
 
-export class Option {
+export interface Option {
     value: string;
     votes: number;
 }
 
-export class PollStatus {
+export interface PollStatus {
     question: string;
     options: Option[];
     totalVotes: number;
     winner: string | null;
     active: boolean;
     hasVoted: boolean;
+}
+
+export interface ErrorResult {
+    error: string;
 }

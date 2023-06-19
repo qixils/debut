@@ -1,40 +1,44 @@
 <script lang="ts">
-    import type {Option} from "src/app";
+    import type {PollStatus} from "src/app";
 
-    export let question: string;
-    export let options: Option[];
+    export let poll: PollStatus;
 
-    let disabled = false;
-    let active = true;
-    let votePercents: Map<string, string> = new Map(options.map(option => [option.value, '0%']));
+    let votePercents: Map<string, string> = new Map(poll.options.map(option => [option.value, '0%']));
 
     function updateVotePercents() {
-        const totalVotes = options.reduce((total, option) => total + option.votes, 0);
-        options.forEach(option => {
+        const totalVotes = poll.options.reduce((total, option) => total + option.votes, 0);
+        poll.options.forEach(option => {
             votePercents.set(option.value, Math.floor(totalVotes === 0 ? 0 : ((option.votes / totalVotes) * 100)) + '%');
         });
         votePercents = votePercents; // svelte shenanigans
     }
 
     function handleClick(optionIndex: number) {
-        if (disabled) return;
-        if (optionIndex < 0 || optionIndex >= options.length) return;
-        const option = options[optionIndex];
+        if (poll.hasVoted) return;
+        if (optionIndex < 0 || optionIndex >= poll.options.length) return;
+        const option = poll.options[optionIndex];
         option.votes++;
         updateVotePercents();
-        disabled = true;
-        // TODO: send answer to server
+        poll.hasVoted = true;
+        fetch('/api/poll/vote?option=' + optionIndex, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+                // TODO: twitch auth token
+            }
+        })
     }
 </script>
 
 <div id="container">
-    <div class="poll {active ? '' : 'opacity-0'}">
-        <h1 class="text-xl font-medium">{question}</h1>
+    <div class="poll {poll.active ? '' : 'opacity-0'}">
+        <h1 class="text-xl font-medium">{poll.question}</h1>
         <ul>
-            {#each options as option}
+            {#each poll.options as option, i}
                 {@const percent = votePercents.get(option.value)}
                 <!-- TODO: dynamically load tailwind colors -->
-                <button {disabled} on:click={() => handleClick(option.value)} style={disabled ? 'background: linear-gradient(90deg, rgba(253, 164, 175, .75) ' + percent + ', rgba(253, 164, 175, .25) ' + percent + ')' : ''}>
+                <!--suppress HtmlWrongAttributeValue (it is wrong; svelte docs condone this)-->
+                <button disabled={poll.hasVoted} on:click={() => handleClick(i)} style={poll.hasVoted ? 'background: linear-gradient(90deg, rgba(253, 164, 175, .75) ' + percent + ', rgba(253, 164, 175, .25) ' + percent + ')' : ''}>
                     {option.value}
                 </button>
             {/each}
@@ -53,7 +57,7 @@
     }
 
     .poll {
-        @apply p-5 pb-1 rounded-xl bg-rose-100/75 text-center w-full shadow shadow-rose-300/50 transition-opacity duration-1000 backdrop-blur backdrop-brightness-125;
+        @apply p-5 pb-1 rounded-xl bg-rose-100/75 text-center w-full shadow shadow-rose-300/50 transition-opacity duration-1000 backdrop-blur backdrop-brightness-125 pointer-events-auto;
     }
 
     button {
