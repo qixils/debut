@@ -36,6 +36,7 @@ data class Poll(
             },
             votes.size,
             winner,
+            winnerIndex,
             active,
             votes.containsKey(requester),
         )
@@ -54,6 +55,7 @@ data class PollStatus(
     val options: List<Option>,
     val totalVotes: Int,
     val winner: String?,
+    val winnerIndex: Int?,
     val active: Boolean,
     val hasVoted: Boolean,
 )

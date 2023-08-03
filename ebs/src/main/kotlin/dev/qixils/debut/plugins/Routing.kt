@@ -1,4 +1,3 @@
-@file:OptIn(KtorExperimentalLocationsAPI::class)
 
 package dev.qixils.debut.plugins
 
@@ -6,16 +5,25 @@ import dev.qixils.debut.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import io.ktor.resources.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
-import io.ktor.server.locations.*
-import io.ktor.server.locations.put
 import io.ktor.server.request.*
+import io.ktor.server.resources.*
+import io.ktor.server.resources.Resources
+import io.ktor.server.resources.put
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import java.time.Instant
 import java.util.*
+import kotlin.collections.Map
+import kotlin.collections.MutableMap
+import kotlin.collections.drop
+import kotlin.collections.listOf
+import kotlin.collections.mapOf
+import kotlin.collections.mutableMapOf
+import kotlin.collections.set
 
 // state
 
@@ -49,8 +57,7 @@ suspend fun publish(channel: String, message: Map<String, *>): HttpResponse {
 // routing
 
 fun Application.configureRouting() {
-    install(Locations) {
-    }
+    install(Resources)
 
     routing {
         authenticate {
@@ -64,8 +71,13 @@ fun Application.configureRouting() {
                         call.respond(HttpStatusCode.Forbidden, ErrorResponse("Only moderators can create polls"))
                         return@put
                     }
-                    // create & save poll
-                    val poll = Poll(it.question, it.options)
+                    // create poll by reading question and options from lines of body
+                    val lines = call.receiveText().trim().lines()
+                    if (lines.size < 3) {
+                        call.respond(HttpStatusCode.BadRequest, ErrorResponse("Poll must have a question and at least two options"))
+                        return@put
+                    }
+                    val poll = Poll(lines[0], lines.drop(1))
                     polls[payload.channelId.toLong()] = poll
                     // publish poll to twitch
                     publish(payload.channelId, mapOf(
@@ -137,17 +149,17 @@ fun Application.configureRouting() {
     }
 }
 
-@Location("/poll")
+@Resource("/poll")
 class PollAPI {
-    @Location("/create")
-    data class Create(val question: String, val options: List<String>)
+    @Resource("create")
+    class Create
 
-    @Location("/vote")
+    @Resource("vote")
     data class Vote(val option: Int)
 
-    @Location("/close")
+    @Resource("close")
     class Close
 
-    @Location("/status")
+    @Resource("status")
     class Status
 }
