@@ -30,15 +30,15 @@ data class Poll(
 
     fun status(requester: String): PollStatus {
         return PollStatus(
-            question,
-            options.mapIndexed { index, option ->
+            question=question,
+            options=options.mapIndexed { index, option ->
                 Option(option, votes.values.count { it == index })
             },
-            votes.size,
-            winner,
-            winnerIndex,
-            active,
-            votes.containsKey(requester),
+            totalVotes=votes.size,
+            winner=winner,
+            winnerIndex=winnerIndex,
+            active=active,
+            hasVoted=votes.containsKey(requester),
         )
     }
 }

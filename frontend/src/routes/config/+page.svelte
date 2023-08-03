@@ -8,33 +8,73 @@
     let currentPoll: PollStatus | undefined;
     let previousPoll: PollStatus | undefined;
     let presets: PollPreset[] = [
-        new PollPreset("Hi", ["Hello", "Hi", "Hey"]),
+        new PollPreset("Hi", ["Hello", "Hi", "Hey"]), // TODO
     ];
+    let question: string = "";
+    let options: string = "";
+    let authHeader: Headers | undefined;
 
-    onMount(async () => setInterval(() => {
-        if (currentPoll === undefined) {
-            return; // TODO: remove this if i ever publicly release this
+    onMount(async () => {
+        Twitch.ext.onAuthorized((auth) => {
+            authHeader = new Headers({Authorization: "Bearer " + auth.token});
+        });
+        setInterval(async () => {
+            // TODO: replace with pubsub listener
+            if (authHeader === undefined) {
+                return;
+            }
+            if (currentPoll === undefined) {
+                return; // TODO: remove this if i ever publicly release this
+            }
+            currentPoll = await fetch("/api/poll/status", {headers: authHeader}).then(res => res.json());
+        }, 1000)
+    });
+
+    async function closePoll() {
+        if (authHeader === undefined) {
+            alert("Not logged in");
+            return;
         }
-        // TODO: currentPoll = <web request>
-    }, 1000));
-
-    function closePoll() {
-        // TODO: previousPoll = <web request>
+        previousPoll = await fetch("/api/poll/close", {method: "POST", headers: authHeader}).then(res => res.json()) as PollStatus;
         previousPoll.hasVoted = true; // disable voting
+        let winner = previousPoll.winner;
         // remove winning option from preset
         if (currentPreset !== undefined) {
-            currentPreset.options = currentPreset.options.filter(option => option !== previousPoll.winner);
+            currentPreset.options = currentPreset.options.filter(option => option !== winner);
         }
     }
 
-    function runPoll(question: string, options: string[]) {
+    async function runPoll(question: string, options: string[]) {
+        if (authHeader === undefined) {
+            alert("Not logged in");
+            return;
+        }
+        if (question === "") {
+            alert("You need a question");
+            return;
+        }
+        options = options.filter(option => option !== "");
+        if (options.length < 2) {
+            alert("You need at least 2 options");
+            return;
+        }
         currentPreset = undefined;
-        // TODO: currentPoll = <web request>
+        let body = question + "\n" + options.join("\n");
+        currentPoll = await fetch("/api/poll/create", {method: "POST", headers: authHeader, body: body}).then(res => res.json());
     }
 
-    function runPreset(preset: PollPreset) {
+    async function runPreset(preset: PollPreset) {
+        if (authHeader === undefined) {
+            alert("Not logged in");
+            return;
+        }
+        if (preset.options.length < 2) {
+            alert("This preset has run out of options");
+            return;
+        }
         currentPreset = preset;
-        // TODO: currentPoll = <web request>
+        let body = preset.question + "\n" + preset.options.join("\n");
+        currentPoll = await fetch("/api/poll/create", {method: "POST", headers: authHeader, body: body}).then(res => res.json());
     }
 </script>
 
@@ -72,6 +112,13 @@
                 <button on:click={() => runPreset(preset)}>Run</button>
             </div>
         {/each}
+    </div>
+
+    <div>
+        <h2>Manual Poll</h2>
+        <input type="text" placeholder="Question" bind:value={question} />
+        <textarea placeholder="Options" bind:value={options} />
+        <button on:click={() => runPoll(question, options.split("\n"))}>Run</button>
     </div>
 </main>
 
