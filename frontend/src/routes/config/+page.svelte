@@ -45,10 +45,12 @@
         }
         previousPoll = await fetch("/api/poll/close", {method: "POST", headers: authHeader}).then(res => res.json()) as PollStatus;
         previousPoll.hasVoted = true; // disable voting
+        previousPoll = previousPoll; // force svelte update
         let winner = previousPoll.winner;
         // remove winning option from preset
         if (currentPreset !== undefined) {
             currentPreset.options = currentPreset.options.filter(option => option !== winner);
+            presets = presets; // force svelte update
         }
     }
 
