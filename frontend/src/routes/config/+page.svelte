@@ -15,19 +15,27 @@
     let authHeader: Headers | undefined;
 
     onMount(async () => {
+        // init authHeader
         Twitch.ext.onAuthorized((auth) => {
             authHeader = new Headers({Authorization: "Bearer " + auth.token});
         });
-        setInterval(async () => {
-            // TODO: replace with pubsub listener
+        // listen to pubsub for poll updates
+        Twitch.ext.listen("broadcast", (target, contentType, message) => {
+            if (contentType !== "application/json") {
+                return;
+            }
+            let data = JSON.parse(message);
+            if (data.status !== undefined) {
+                currentPoll = data.status;
+            }
+        });
+        // init currentPoll
+        setTimeout(async () => {
             if (authHeader === undefined) {
                 return;
             }
-            if (currentPoll === undefined) {
-                return; // TODO: remove this if i ever publicly release this
-            }
             currentPoll = await fetch("/api/poll/status", {headers: authHeader}).then(res => res.json());
-        }, 1000)
+        }, 1000);
     });
 
     async function closePoll() {

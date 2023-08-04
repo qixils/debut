@@ -17,12 +17,6 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import java.time.Instant
 import java.util.*
-import kotlin.collections.Map
-import kotlin.collections.MutableMap
-import kotlin.collections.drop
-import kotlin.collections.listOf
-import kotlin.collections.mapOf
-import kotlin.collections.mutableMapOf
 import kotlin.collections.set
 
 // state
@@ -82,8 +76,7 @@ fun Application.configureRouting() {
                     // publish poll to twitch
                     publish(payload.channelId, mapOf(
                         "type" to "create",
-                        "question" to poll.question,
-                        "options" to poll.options,
+                        "status" to poll.status(payload.opaqueUserId),
                     ))
                     // respond
                     call.respond(HttpStatusCode.OK)
@@ -103,6 +96,11 @@ fun Application.configureRouting() {
                         call.respond(HttpStatusCode.BadRequest, ErrorResponse(ex))
                         return@put
                     }
+                    // publish vote to twitch
+                    publish(payload.channelId, mapOf(
+                        "type" to "vote",
+                        "status" to poll.status(payload.opaqueUserId),
+                    ))
                     // respond
                     call.respond(HttpStatusCode.OK)
                 }
@@ -129,6 +127,7 @@ fun Application.configureRouting() {
                     // publish closure to twitch
                     publish(payload.channelId, mapOf(
                         "type" to "close",
+                        "status" to poll.status(payload.opaqueUserId),
                     ))
                     // respond
                     call.respond(HttpStatusCode.OK, poll.status(payload.opaqueUserId))
