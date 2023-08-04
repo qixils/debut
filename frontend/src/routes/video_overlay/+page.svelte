@@ -1,20 +1,38 @@
 <script lang="ts">
     import Poll from "$lib/Poll.svelte";
     import type {PollStatus} from "src/app.js";
+    import {onMount} from "svelte";
 
-    let poll: PollStatus = {
-        question: "lexi's fate???",
-        options: [
-            {value: "kill her", votes: 23},
-            {value: "spare her", votes: 14}
-        ],
-        totalVotes: 37,
-        winner: null,
-        active: true,
-        hasVoted: false,
-    }
+    let poll: PollStatus | undefined;
+    let authHeader: Headers | undefined;
+
+    onMount(async () => {
+        // init authHeader
+        Twitch.ext.onAuthorized((auth) => {
+            authHeader = new Headers({Authorization: "Bearer " + auth.token});
+        });
+        // listen to pubsub for poll updates
+        Twitch.ext.listen("broadcast", (target, contentType, message) => {
+            if (contentType !== "application/json") {
+                return;
+            }
+            let data = JSON.parse(message);
+            if (data.status !== undefined) {
+                poll = data.status;
+            }
+        });
+        // init currentPoll
+        setTimeout(async () => {
+            if (authHeader === undefined) {
+                return;
+            }
+            poll = await fetch("/api/poll/status", {headers: authHeader}).then(res => res.json());
+        }, 1000);
+    });
 </script>
 
-<div class="w-1/3 max-w-xs mx-auto fixed right-4 top-4 pointer-events-none">
-    <Poll {poll} />
-</div>
+{#if poll !== undefined}
+    <div class="w-1/3 max-w-xs mx-auto fixed right-4 top-4 pointer-events-none">
+        <Poll {poll} />
+    </div>
+{/if}
