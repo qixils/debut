@@ -1,6 +1,6 @@
 <script lang="ts">
     import Poll from "$lib/Poll.svelte";
-    import type {PollStatus} from "src/app.js";
+    import type {PollStatus} from "$lib/app";
     import {onMount} from "svelte";
 
     let poll: PollStatus | undefined;

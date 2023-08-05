@@ -1,7 +1,7 @@
 <script lang="ts">
     import Poll from "$lib/Poll.svelte";
-    import type {PollStatus} from "src/app.js";
-    import {PollPreset} from "src/app.js";
+    import type {PollStatus} from "$lib/app";
+    import {PollPreset} from "$lib/app";
     import {onMount} from "svelte";
 
     let currentPreset: PollPreset | undefined;

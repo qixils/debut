@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type {PollStatus} from "src/app";
+    import type {PollStatus} from "$lib/app";
 
     export let poll: PollStatus;
 
