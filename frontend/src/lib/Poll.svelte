@@ -57,10 +57,10 @@
     }
 
     .poll {
-        @apply p-5 pb-1 rounded-xl bg-rose-100/75 text-center w-full shadow shadow-rose-300/50 transition-opacity duration-1000 backdrop-blur backdrop-brightness-125 pointer-events-auto;
+        @apply px-5 py-3 rounded-xl bg-rose-100/75 text-center w-full shadow shadow-rose-300/50 transition-opacity duration-1000 backdrop-blur backdrop-brightness-125 pointer-events-auto;
     }
 
     button {
-        @apply block w-full p-3 my-4 rounded bg-rose-200/75 enabled:hover:ring-rose-400/75 enabled:hover:ring ring-offset-0 transition-shadow duration-200;
+        @apply block w-full p-3 my-1 rounded bg-rose-200/75 enabled:hover:ring-rose-400/75 enabled:hover:ring ring-offset-0 transition-shadow duration-200;
     }
 </style>

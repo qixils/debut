@@ -67,8 +67,8 @@ fun Application.configureRouting() {
                     }
                     // create poll by reading question and options from lines of body
                     val lines = call.receiveText().trim().lines()
-                    if (lines.size < 3) {
-                        call.respond(HttpStatusCode.BadRequest, ErrorResponse("Poll must have a question and at least two options"))
+                    if (lines.size < 2) {
+                        call.respond(HttpStatusCode.BadRequest, ErrorResponse("Poll must have a question and at least one option"))
                         return@put
                     }
                     val poll = Poll(lines[0], lines.drop(1))

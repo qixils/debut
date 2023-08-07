@@ -9,9 +9,25 @@
     let previousPoll: PollStatus | undefined;
     let presets: PollPreset[] = [
         new PollPreset("Hi", ["Hello", "Hi", "Hey"]), // TODO
+        new PollPreset("Hi", ["Hello", "Hi", "Hey"]), // TODO
     ];
     let question: string = "";
     let options: string = "";
+    let pollPreview: PollStatus;
+    $: pollPreview = {
+        question: question,
+        options: options.split("\n").filter(option => option !== "").map(option => {
+            return {
+                value: option,
+                votes: 0,
+            }
+        }),
+        totalVotes: 0,
+        winner: null,
+        winnerIndex: null,
+        active: true,
+        hasVoted: true,
+    }
     let authHeader: Headers | undefined;
 
     onMount(async () => {
@@ -64,8 +80,8 @@
             return;
         }
         options = options.filter(option => option !== "");
-        if (options.length < 2) {
-            alert("You need at least 2 options");
+        if (options.length < 1) {
+            alert("You need at least 1 option");
             return;
         }
         currentPreset = undefined;
@@ -78,7 +94,7 @@
             alert("Not logged in");
             return;
         }
-        if (preset.options.length < 2) {
+        if (preset.options.length < 1) {
             alert("This preset has run out of options");
             return;
         }
@@ -89,6 +105,12 @@
 </script>
 
 <main>
+    {#if authHeader === undefined}
+        <h1 class="text-red-500">Unauthorized</h1>
+    {:else}
+        <h1 class="text-green-500">Authorized</h1>
+    {/if}
+
     <div>
         <h2>Active Poll</h2>
         {#if currentPoll !== undefined}
@@ -111,33 +133,90 @@
 
     <div>
         <h2>Presets</h2>
-        {#each presets as preset (preset.question)}
-            <div>
-                <h3>{preset.question}</h3>
-                <ul>
-                    {#each preset.options as option (option)}
-                        <li>{option}</li>
-                    {/each}
-                </ul>
-                <button on:click={() => runPreset(preset)}>Run</button>
-            </div>
-        {/each}
+        <div class="presets">
+            {#each presets as preset}
+                <div class="preset">
+                    <h3>{preset.question}</h3>
+                    <ul>
+                        {#each preset.options as option}
+                            <li>{option}</li>
+                        {/each}
+                    </ul>
+                    <button on:click={() => runPreset(preset)}>Run</button>
+                </div>
+            {/each}
+        </div>
     </div>
 
-    <div>
-        <h2>Manual Poll</h2>
-        <input type="text" placeholder="Question" bind:value={question} />
-        <textarea placeholder="Options" bind:value={options} />
-        <button on:click={() => runPoll(question, options.split("\n"))}>Run</button>
+    <div class="flex flex-row">
+        <div class="mx-2">
+            <h2>Manual Poll</h2>
+            <p><input type="text" placeholder="Question" bind:value={question} /></p>
+            <p><textarea placeholder="Options" bind:value={options} /></p>
+            <button on:click={() => runPoll(question, options.split("\n"))}>Run</button>
+        </div>
+        <div>
+            <Poll poll={pollPreview} />
+        </div>
     </div>
 </main>
 
-<style>
+<style lang="postcss">
     main {
+        @apply bg-gradient-to-br from-rose-200 to-rose-300 p-4;
         display: flex;
         flex-direction: column;
-        align-items: center;
-        justify-content: center;
         height: 100vh;
+    }
+
+    main > div {
+        @apply bg-white/50 rounded-lg shadow-lg p-4 my-2;
+    }
+
+    h1 {
+        @apply text-3xl font-bold;
+    }
+
+    h2 {
+        @apply text-2xl font-bold;
+    }
+
+    h3 {
+        @apply text-xl font-bold;
+    }
+
+    .presets {
+        display: flex;
+        flex-wrap: wrap;
+        flex-direction: row;
+    }
+
+    .presets > div {
+        @apply bg-white/50 rounded-lg shadow-md p-2 m-1;
+        min-width: 8em;
+    }
+
+    .preset > h3 {
+        @apply text-center;
+    }
+
+    .preset button {
+        @apply mx-auto;
+    }
+
+    ul {
+        @apply list-disc list-inside;
+    }
+
+    button {
+        @apply bg-rose-500 hover:bg-rose-600 text-white font-bold py-2 px-4 m-2 rounded block;
+    }
+
+    input, textarea {
+        width: 24em;
+    }
+
+    textarea {
+        height: 12em;
     }
 </style>
