@@ -17,7 +17,7 @@ enum class Role(
     ;
 
     companion object {
-        fun fromId(id: String) = values().first { it.id == id }
+        fun fromId(id: String) = entries.first { it.id == id }
     }
 }
 

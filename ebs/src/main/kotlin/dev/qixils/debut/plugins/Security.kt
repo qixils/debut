@@ -11,6 +11,12 @@ fun Application.configureSecurity() {
     authentication {
         jwt {
             verifier(JWT.require(algorithm).build())
+            validate { credential ->
+                if (!credential.payload.getClaim("channel_id").asString().isNullOrEmpty())
+                    JWTPrincipal(credential.payload)
+                else
+                    null
+            }
         }
     }
 

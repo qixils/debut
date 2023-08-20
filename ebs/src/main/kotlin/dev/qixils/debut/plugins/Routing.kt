@@ -12,7 +12,7 @@ import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
 import io.ktor.server.resources.*
 import io.ktor.server.resources.Resources
-import io.ktor.server.resources.put
+import io.ktor.server.resources.post
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import java.time.Instant
@@ -55,21 +55,21 @@ fun Application.configureRouting() {
 
     routing {
         authenticate {
-            route("/api") {
-                put<PollAPI.Create> {
+            route("/api/poll") {
+                post<Create> {
                     // load payload
                     val principal = call.principal<JWTPrincipal>()!!
                     val payload = TwitchIncomingJWT.from(principal.payload)
                     // ignore if user is not a moderator
                     if (!payload.role.isModerator) {
                         call.respond(HttpStatusCode.Forbidden, ErrorResponse("Only moderators can create polls"))
-                        return@put
+                        return@post
                     }
                     // create poll by reading question and options from lines of body
                     val lines = call.receiveText().trim().lines()
                     if (lines.size < 2) {
                         call.respond(HttpStatusCode.BadRequest, ErrorResponse("Poll must have a question and at least one option"))
-                        return@put
+                        return@post
                     }
                     val poll = Poll(lines[0], lines.drop(1))
                     polls[payload.channelId.toLong()] = poll
@@ -82,19 +82,19 @@ fun Application.configureRouting() {
                     call.respond(HttpStatusCode.OK)
                 }
 
-                put<PollAPI.Vote> {
+                post<Vote> {
                     // load poll
                     val (payload, poll) = loadPoll(call)
                     if (poll == null) {
                         call.respond(HttpStatusCode.NotFound, ErrorResponse("No poll is active"))
-                        return@put
+                        return@post
                     }
                     // record vote
                     try {
                         poll.vote(payload.opaqueUserId, it.option)
                     } catch (ex: IllegalStateException) {
                         call.respond(HttpStatusCode.BadRequest, ErrorResponse(ex))
-                        return@put
+                        return@post
                     }
                     // publish vote to twitch
                     publish(payload.channelId, mapOf(
@@ -105,24 +105,24 @@ fun Application.configureRouting() {
                     call.respond(HttpStatusCode.OK)
                 }
 
-                put<PollAPI.Close> {
+                post<Close> {
                     // load poll
                     val (payload, poll) = loadPoll(call)
                     if (poll == null) {
                         call.respond(HttpStatusCode.NotFound, ErrorResponse("No poll is active"))
-                        return@put
+                        return@post
                     }
                     // ignore if user is not a moderator
                     if (!payload.role.isModerator) {
                         call.respond(HttpStatusCode.Forbidden, ErrorResponse("Only moderators can close polls"))
-                        return@put
+                        return@post
                     }
                     // close poll
                     try {
                         poll.close()
                     } catch (ex: IllegalStateException) {
                         call.respond(HttpStatusCode.BadRequest, ErrorResponse(ex))
-                        return@put
+                        return@post
                     }
                     // publish closure to twitch
                     publish(payload.channelId, mapOf(
@@ -133,7 +133,7 @@ fun Application.configureRouting() {
                     call.respond(HttpStatusCode.OK, poll.status(payload.opaqueUserId))
                 }
 
-                get<PollAPI.Status> {
+                get<Status> {
                     // load poll
                     val (payload, poll) = loadPoll(call)
                     if (poll == null) {
@@ -148,17 +148,14 @@ fun Application.configureRouting() {
     }
 }
 
-@Resource("/poll")
-class PollAPI {
-    @Resource("create")
-    class Create
+@Resource("/create")
+class Create
 
-    @Resource("vote")
-    data class Vote(val option: Int)
+@Resource("/vote")
+data class Vote(val option: Int)
 
-    @Resource("close")
-    class Close
+@Resource("/close")
+class Close
 
-    @Resource("status")
-    class Status
-}
+@Resource("/status")
+class Status
