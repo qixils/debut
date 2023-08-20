@@ -46,12 +46,12 @@
             }
         });
         // init currentPoll
-        setTimeout(async () => {
+        setInterval(async () => {
             if (authHeader === undefined) {
                 return;
             }
             currentPoll = await fetch("/api/poll/status", {headers: authHeader}).then(res => res.json());
-        }, 1000);
+        }, 5000);
     });
 
     async function closePoll() {
