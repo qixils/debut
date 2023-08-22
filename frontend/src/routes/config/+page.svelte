@@ -53,6 +53,9 @@
                 return;
             }
             let newPoll = await fetch("/api/poll/status", {headers: authHeader}).then(res => res.json());
+            if (!newPoll) {
+                return;
+            }
             if (newPoll.active) {
                 currentPoll = newPoll;
             } else {
