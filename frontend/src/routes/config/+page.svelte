@@ -39,6 +39,7 @@
         });
         // listen to pubsub for poll updates
         Twitch.ext.listen("broadcast", (target, contentType, message) => {
+            console.log("Received broadcast message", target, contentType, message);
             if (contentType !== "application/json") {
                 return;
             }
@@ -53,7 +54,7 @@
                 return;
             }
             let newPoll = await fetch("/api/poll/status", {headers: authHeader}).then(res => res.json());
-            if (!newPoll) {
+            if (!newPoll || newPoll.error) {
                 return;
             }
             if (newPoll.active) {
