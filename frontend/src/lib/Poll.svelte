@@ -40,7 +40,7 @@
                 {@const percent = votePercents.get(option.value)}
                 <!-- TODO: dynamically load tailwind colors -->
                 <!--suppress HtmlWrongAttributeValue (it is wrong; svelte docs condone this)-->
-                <button disabled={poll.hasVoted || !authToken} on:click={() => handleClick(i)} style={poll.hasVoted ? 'background: linear-gradient(90deg, rgba(253, 164, 175, .75) ' + percent + ', rgba(253, 164, 175, .25) ' + percent + ')' : ''}>
+                <button disabled={poll.hasVoted || !poll.active || !authToken} on:click={() => handleClick(i)} style={poll.hasVoted ? 'background: linear-gradient(90deg, rgba(253, 164, 175, .75) ' + percent + ', rgba(253, 164, 175, .25) ' + percent + ')' : ''}>
                     {option.value}
                 </button>
             {/each}

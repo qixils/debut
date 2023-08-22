@@ -76,10 +76,10 @@ fun Application.configureRouting() {
                     // publish poll to twitch
                     publish(payload.channelId, mapOf(
                         "type" to "create",
-                        "status" to poll.status(payload.opaqueUserId),
+                        "status" to poll.status(),
                     ))
                     // respond
-                    call.respond(HttpStatusCode.OK)
+                    call.respond(HttpStatusCode.OK, poll.status(payload.opaqueUserId))
                 }
 
                 post<Vote> {
@@ -99,10 +99,10 @@ fun Application.configureRouting() {
                     // publish vote to twitch
                     publish(payload.channelId, mapOf(
                         "type" to "vote",
-                        "status" to poll.status(payload.opaqueUserId),
+                        "status" to poll.status(),
                     ))
                     // respond
-                    call.respond(HttpStatusCode.OK)
+                    call.respond(HttpStatusCode.OK, poll.status(payload.opaqueUserId))
                 }
 
                 post<Close> {
@@ -127,7 +127,7 @@ fun Application.configureRouting() {
                     // publish closure to twitch
                     publish(payload.channelId, mapOf(
                         "type" to "close",
-                        "status" to poll.status(payload.opaqueUserId),
+                        "status" to poll.status(),
                     ))
                     // respond
                     call.respond(HttpStatusCode.OK, poll.status(payload.opaqueUserId))

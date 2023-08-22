@@ -28,7 +28,7 @@ data class Poll(
         active = false
     }
 
-    fun status(requester: String): PollStatus {
+    fun status(requester: String? = null): PollStatus {
         return PollStatus(
             question=question,
             options=options.mapIndexed { index, option ->
@@ -38,7 +38,7 @@ data class Poll(
             winner=winner,
             winnerIndex=winnerIndex,
             active=active,
-            hasVoted=votes.containsKey(requester),
+            hasVoted=requester != null && requester in votes,
         )
     }
 }
