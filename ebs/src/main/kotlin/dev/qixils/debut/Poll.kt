@@ -8,7 +8,7 @@ data class Poll(
 ) {
     // map of user ID to option index
     private val votes: MutableMap<String, Int> = mutableMapOf()
-    var active = false
+    var active = true
     var winnerIndex: Int? = null
     val winner: String?
         get() = winnerIndex?.let { options[it] }
