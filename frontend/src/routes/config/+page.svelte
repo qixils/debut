@@ -25,15 +25,17 @@
         totalVotes: 0,
         winner: null,
         winnerIndex: null,
-        active: true,
+        active: false,
         hasVoted: true,
     }
     let authHeader: Headers | undefined;
+    let authToken: string | undefined;
 
     onMount(async () => {
         // init authHeader
         Twitch.ext.onAuthorized((auth) => {
-            authHeader = new Headers({Authorization: "Bearer " + auth.token});
+            authToken = auth.token;
+            authHeader = new Headers({Authorization: "Bearer " + authToken});
         });
         // listen to pubsub for poll updates
         Twitch.ext.listen("broadcast", (target, contentType, message) => {
@@ -50,7 +52,13 @@
             if (authHeader === undefined) {
                 return;
             }
-            currentPoll = await fetch("/api/poll/status", {headers: authHeader}).then(res => res.json());
+            let newPoll = await fetch("/api/poll/status", {headers: authHeader}).then(res => res.json());
+            if (newPoll.active) {
+                currentPoll = newPoll;
+            } else {
+                currentPoll = undefined;
+                previousPoll = newPoll;
+            }
         }, 5000);
     });
 
@@ -114,7 +122,7 @@
     <div>
         <h2>Active Poll</h2>
         {#if currentPoll !== undefined}
-            <Poll poll={currentPoll} />
+            <Poll poll={currentPoll} {authToken} />
             <button on:click={closePoll}>Close Poll</button>
         {:else}
             <p>No active poll</p>

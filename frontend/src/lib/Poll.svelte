@@ -2,6 +2,7 @@
     import type {PollStatus} from "$lib/app";
 
     export let poll: PollStatus;
+    export let authToken: string | undefined;
 
     let votePercents: Map<string, string> = new Map(poll.options.map(option => [option.value, '0%']));
 
@@ -14,6 +15,7 @@
     }
 
     function handleClick(optionIndex: number) {
+        if (!authToken) return;
         if (poll.hasVoted) return;
         if (optionIndex < 0 || optionIndex >= poll.options.length) return;
         const option = poll.options[optionIndex];
@@ -22,23 +24,23 @@
         poll.hasVoted = true;
         fetch('/api/poll/vote?option=' + optionIndex, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-                // TODO: twitch auth token
-            }
+            headers: {'Authorization': 'Bearer ' + authToken}
         })
     }
 </script>
 
 <div id="container">
-    <div class="poll {poll.active ? '' : 'opacity-0'}">
+    <div class="poll">
         <h1 class="text-xl font-medium">{poll.question}</h1>
+        {#if !authToken && !poll.hasVoted && poll.active}
+            <p>To vote, please grant permissions to the extension</p>
+        {/if}
         <ul>
             {#each poll.options as option, i}
                 {@const percent = votePercents.get(option.value)}
                 <!-- TODO: dynamically load tailwind colors -->
                 <!--suppress HtmlWrongAttributeValue (it is wrong; svelte docs condone this)-->
-                <button disabled={poll.hasVoted} on:click={() => handleClick(i)} style={poll.hasVoted ? 'background: linear-gradient(90deg, rgba(253, 164, 175, .75) ' + percent + ', rgba(253, 164, 175, .25) ' + percent + ')' : ''}>
+                <button disabled={poll.hasVoted || !authToken} on:click={() => handleClick(i)} style={poll.hasVoted ? 'background: linear-gradient(90deg, rgba(253, 164, 175, .75) ' + percent + ', rgba(253, 164, 175, .25) ' + percent + ')' : ''}>
                     {option.value}
                 </button>
             {/each}
@@ -47,17 +49,8 @@
 </div>
 
 <style lang="postcss">
-    @keyframes fade-in {
-        0% { opacity: 0; }
-        100% { opacity: 1; }
-    }
-
-    #container {
-        animation: fade-in .5s ease-in-out;
-    }
-
     .poll {
-        @apply px-5 py-3 rounded-xl bg-rose-100/75 text-center w-full shadow shadow-rose-300/50 transition-opacity duration-1000 backdrop-blur backdrop-brightness-125 pointer-events-auto;
+        @apply px-5 py-3 rounded-xl bg-rose-100/75 text-center w-full shadow shadow-rose-300/50 backdrop-blur backdrop-brightness-125 pointer-events-auto;
     }
 
     button {

@@ -1,15 +1,18 @@
 <script lang="ts">
     import Poll from "$lib/Poll.svelte";
     import type {PollStatus} from "$lib/app";
+    import {placeholderPoll} from "$lib/app";
     import {onMount} from "svelte";
 
-    let poll: PollStatus | undefined;
+    let poll: PollStatus = placeholderPoll;
     let authHeader: Headers | undefined;
+    let authToken: string | undefined;
 
     onMount(async () => {
         // init authHeader
         Twitch.ext.onAuthorized((auth) => {
-            authHeader = new Headers({Authorization: "Bearer " + auth.token});
+            authToken = auth.token;
+            authHeader = new Headers({Authorization: "Bearer " + authToken});
         });
         // listen to pubsub for poll updates
         Twitch.ext.listen("broadcast", (target, contentType, message) => {
@@ -31,8 +34,6 @@
     });
 </script>
 
-{#if poll !== undefined}
-    <div class="w-1/3 max-w-xs mx-auto fixed right-4 top-4 pointer-events-none">
-        <Poll {poll} />
-    </div>
-{/if}
+<div class="w-1/3 max-w-xs mx-auto fixed right-4 top-4 pointer-events-none transition-opacity duration-1000 {poll.active ? 'opacity-100' : 'opacity-0'}">
+    <Poll {poll} {authToken} />
+</div>
