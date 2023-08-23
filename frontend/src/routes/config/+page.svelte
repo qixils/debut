@@ -37,17 +37,6 @@
             authToken = auth.token;
             authHeader = new Headers({Authorization: "Bearer " + authToken});
         });
-        // listen to pubsub for poll updates
-        Twitch.ext.listen("broadcast", (target, contentType, message) => {
-            console.log("Received broadcast message", target, contentType, message);
-            if (contentType !== "application/json") {
-                return;
-            }
-            let data = JSON.parse(message);
-            if (data.status !== undefined) {
-                currentPoll = data.status;
-            }
-        });
         // init currentPoll
         setInterval(async () => {
             if (authHeader === undefined) {
@@ -73,6 +62,7 @@
         }
         previousPoll = await fetch("/api/poll/close", {method: "POST", headers: authHeader}).then(res => res.json()) as PollStatus;
         previousPoll.hasVoted = true; // disable voting
+        currentPoll = undefined;
         previousPoll = previousPoll; // force svelte update
         let winner = previousPoll.winner;
         // remove winning option from preset
