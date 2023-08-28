@@ -8,8 +8,9 @@
     let currentPoll: PollStatus | undefined;
     let previousPoll: PollStatus | undefined;
     let presets: PollPreset[] = [
-        new PollPreset("Hi", ["Hello", "Hi", "Hey"]), // TODO
-        new PollPreset("Hi", ["Hello", "Hi", "Hey"]), // TODO
+        new PollPreset("Mess with the intro...", ["Unplug Monitor", "Mute Microphone", "Invert Colors"]),
+        new PollPreset("Mess with Krita...", ["Unplug Tablet", "Clear Drawing", "Invert Tablet"]),
+        new PollPreset("Mess with Minecraft...", ["Unplug Mouse", "Invert Controls", "Disable Jump"])
     ];
     let question: string = "";
     let options: string = "";
@@ -66,8 +67,11 @@
         previousPoll = previousPoll; // force svelte update
         let winner = previousPoll.winner;
         // remove winning option from preset
-        if (currentPreset !== undefined) {
+        if (currentPreset !== undefined && winner) {
             currentPreset.options = currentPreset.options.filter(option => option !== winner);
+            if (currentPreset.options.length === 1) {
+                currentPreset.options = currentPreset.options.concat(["Spare Lexi"]);
+            }
             presets = presets; // force svelte update
         }
     }

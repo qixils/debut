@@ -33,14 +33,14 @@
     <div class="poll">
         <h1 class="text-xl font-medium">{poll.question}</h1>
         {#if !authToken && !poll.hasVoted && poll.active}
-            <p>To vote, please grant permissions to the extension</p>
+            <p class="text-gray-700 font-light text-sm">Grant permissions to the extension to vote</p>
         {/if}
         <ul>
             {#each poll.options as option, i}
                 {@const percent = votePercents.get(option.value)}
                 <!-- TODO: dynamically load tailwind colors -->
                 <!--suppress HtmlWrongAttributeValue (it is wrong; svelte docs condone this)-->
-                <button disabled={poll.hasVoted || !poll.active || !authToken} on:click={() => handleClick(i)} style={poll.hasVoted ? 'background: linear-gradient(90deg, rgba(253, 164, 175, .75) ' + percent + ', rgba(253, 164, 175, .25) ' + percent + ')' : ''}>
+                <button class={poll.active ? 'pointer-events-auto' : ''} disabled={poll.hasVoted || !poll.active || !authToken} on:click={() => handleClick(i)} style={poll.hasVoted ? 'background: linear-gradient(90deg, rgba(253, 164, 175, .75) ' + percent + ', rgba(253, 164, 175, .25) ' + percent + ')' : ''}>
                     {option.value}
                 </button>
             {/each}
@@ -50,7 +50,7 @@
 
 <style lang="postcss">
     .poll {
-        @apply px-5 py-3 rounded-xl bg-rose-100/75 text-center w-full shadow shadow-rose-300/50 backdrop-blur backdrop-brightness-125 pointer-events-auto;
+        @apply px-5 py-3 rounded-xl bg-rose-100/75 text-center w-full shadow shadow-rose-300/50 backdrop-blur backdrop-brightness-125;
     }
 
     button {

@@ -1,12 +1,18 @@
 <script lang="ts">
     import Poll from "$lib/Poll.svelte";
+    import Dialogue from "$lib/Dialogue.svelte";
     import type {PollStatus} from "$lib/app";
-    import {placeholderPoll} from "$lib/app";
+    import {dialogue, placeholderPoll} from "$lib/app";
     import {onMount} from "svelte";
 
     let poll: PollStatus = placeholderPoll;
     let authHeader: Headers | undefined;
     let authToken: string | undefined;
+
+    let dialogue_index = 0;
+    function next_dialogue() {
+        dialogue_index++;
+    }
 
     onMount(async () => {
         // init authHeader
@@ -20,7 +26,7 @@
                 return;
             }
             let data = JSON.parse(message);
-            if (data.status !== undefined) {
+            if (data.status !== undefined && !data.status.error) {
                 poll = data.status;
             }
         });
@@ -29,11 +35,29 @@
             if (authHeader === undefined) {
                 return;
             }
-            poll = await fetch("/api/poll/status", {headers: authHeader}).then(res => res.json());
+            let newPoll = await fetch("/api/poll/status", {headers: authHeader}).then(res => res.json());
+            if (newPoll && !newPoll.error) {
+                poll = newPoll;
+            }
         }, 1000);
+        // setInterval(async () => {
+        //     poll = fullPlaceholderPoll;
+        // }, 1000);
     });
 </script>
 
-<div class="w-1/3 max-w-xs mx-auto fixed right-4 top-4 pointer-events-none transition-opacity duration-1000 {poll.active ? 'opacity-100' : 'opacity-0'}">
-    <Poll {poll} {authToken} />
+<div id="transition" class="w-1/3 max-w-xs mx-auto fixed right-4 top-4 pointer-events-none" style="opacity: {poll.active ? '1' : '0'}; transform: {poll.active ? 'translateY(0)' : 'translateY(-100%)'}">
+    {#if dialogue_index < dialogue.length}
+        <Dialogue index={dialogue_index} active={poll.active} next={next_dialogue} />
+    {:else}
+        <Poll {poll} {authToken} />
+    {/if}
 </div>
+
+<style>
+    #transition {
+        transition-property: opacity, transform;
+        transition-duration: 2s;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+</style>

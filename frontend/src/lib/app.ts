@@ -30,3 +30,24 @@ export let placeholderPoll: PollStatus = {
     active: false,
     hasVoted: true,
 }
+export let fullPlaceholderPoll: PollStatus = {
+    question: 'placeholder',
+    options: [{
+        value: "option 1",
+        votes: 7,
+    }, {
+        value: "option 2",
+        votes: 3,
+    }],
+    totalVotes: 10,
+    winner: null,
+    winnerIndex: null,
+    active: true,
+    hasVoted: true,
+}
+export let dialogue: string[][] = [
+    ["hey, you", "...?"],
+    ["this stream is kinda boring right?", "yeah kinda"],
+    ["don't you want to mess with it? 😈", "hell yeah i do"],
+    ["i think i just finished hacking in to the stream, i just need you to help me decide what to do", "sounds good"]
+]
