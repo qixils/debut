@@ -12,6 +12,14 @@ const config = {
       postcss: true,
     }),
   ],
+
+  csp: {
+    directives: {
+      'script-src': ["'self'"],
+    },
+  },
+
+  //embedded: true,
 };
 
 export default config;

@@ -29,14 +29,15 @@
         active: false,
         hasVoted: true,
     }
-    let authHeader: Headers | undefined;
     let authToken: string | undefined;
+    let authHeader: Headers | undefined;
+    $: authHeader = authToken ? new Headers({"Authorization": `Bearer ${authToken}`}) : undefined;
 
     onMount(async () => {
-        // init authHeader
+        // init authToken
+        authToken = Twitch.ext.viewer.sessionToken;
         Twitch.ext.onAuthorized((auth) => {
             authToken = auth.token;
-            authHeader = new Headers({Authorization: "Bearer " + authToken});
         });
         // init currentPoll
         setInterval(async () => {

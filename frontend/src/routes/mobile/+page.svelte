@@ -6,8 +6,9 @@
     import {onMount} from "svelte";
 
     let poll: PollStatus = placeholderPoll;
-    let authHeader: Headers | undefined;
     let authToken: string | undefined;
+    let authHeader: Headers | undefined;
+    $: authHeader = authToken ? new Headers({"Authorization": `Bearer ${authToken}`}) : undefined;
 
     let dialogue_index = 0;
     function next_dialogue() {
@@ -15,10 +16,10 @@
     }
 
     onMount(async () => {
-        // init authHeader
+        // init authToken
+        authToken = Twitch.ext.viewer.sessionToken;
         Twitch.ext.onAuthorized((auth) => {
             authToken = auth.token;
-            authHeader = new Headers({Authorization: "Bearer " + authToken});
         });
         // listen to pubsub for poll updates
         Twitch.ext.listen("broadcast", (target, contentType, message) => {
