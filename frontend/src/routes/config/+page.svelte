@@ -43,7 +43,7 @@
             if (authHeader === undefined) {
                 return;
             }
-            let newPoll = await fetch("/api/poll/status", {headers: authHeader}).then(res => res.json());
+            let newPoll = await fetch("https://debut.qixils.dev/api/poll/status", {headers: authHeader}).then(res => res.json());
             if (!newPoll || newPoll.error) {
                 return;
             }
@@ -61,7 +61,12 @@
             alert("Not logged in");
             return;
         }
-        previousPoll = await fetch("/api/poll/close", {method: "POST", headers: authHeader}).then(res => res.json()) as PollStatus;
+        let newPreviousPoll = await fetch("https://debut.qixils.dev/api/poll/close", {method: "POST", headers: authHeader}).then(res => res.json()) as PollStatus;
+        if (!newPreviousPoll || newPreviousPoll.error) {
+            alert("Error closing poll: " + newPreviousPoll?.error);
+            return;
+        }
+        previousPoll = newPreviousPoll;
         previousPoll.hasVoted = true; // disable voting
         currentPoll = undefined;
         previousPoll = previousPoll; // force svelte update
@@ -92,7 +97,11 @@
         }
         currentPreset = undefined;
         let body = question + "\n" + options.join("\n");
-        currentPoll = await fetch("/api/poll/create", {method: "POST", headers: authHeader, body: body}).then(res => res.json());
+        let newCurrentPoll = await fetch("https://debut.qixils.dev/api/poll/create", {method: "POST", headers: authHeader, body: body}).then(res => res.json());
+        if (!newCurrentPoll || newCurrentPoll.error) {
+            alert("Error creating poll: " + newCurrentPoll?.error);
+            return;
+        }
     }
 
     async function runPreset(preset: PollPreset) {
@@ -106,7 +115,11 @@
         }
         currentPreset = preset;
         let body = preset.question + "\n" + preset.options.join("\n");
-        currentPoll = await fetch("/api/poll/create", {method: "POST", headers: authHeader, body: body}).then(res => res.json());
+        let newCurrentPoll = await fetch("https://debut.qixils.dev/api/poll/create", {method: "POST", headers: authHeader, body: body}).then(res => res.json());
+        if (!newCurrentPoll || newCurrentPoll.error) {
+            alert("Error creating poll: " + newCurrentPoll?.error);
+            return;
+        }
     }
 </script>
 

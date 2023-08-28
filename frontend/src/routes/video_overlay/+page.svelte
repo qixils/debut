@@ -35,10 +35,11 @@
             if (authHeader === undefined) {
                 return;
             }
-            let newPoll = await fetch("/api/poll/status", {headers: authHeader}).then(res => res.json());
-            if (newPoll && !newPoll.error) {
-                poll = newPoll;
+            let newPoll = await fetch("https://debut.qixils.dev/api/poll/status", {headers: authHeader}).then(res => res.json());
+            if (!newPoll || newPoll.error) {
+                return;
             }
+            poll = newPoll;
         }, 1000);
         // setInterval(async () => {
         //     poll = fullPlaceholderPoll;

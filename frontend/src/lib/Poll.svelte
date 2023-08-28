@@ -22,7 +22,7 @@
         option.votes++;
         updateVotePercents();
         poll.hasVoted = true;
-        fetch('/api/poll/vote?option=' + optionIndex, {
+        fetch('https://debut.qixils.dev/api/poll/vote?option=' + optionIndex, {
             method: 'POST',
             headers: {'Authorization': 'Bearer ' + authToken}
         })
