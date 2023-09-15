@@ -27,12 +27,15 @@
             headers: {'Authorization': 'Bearer ' + authToken}
         })
     }
+
+    let canVote: boolean;
+    $: canVote = !poll.hasVoted && poll.active && authToken !== undefined;
 </script>
 
 <div id="container">
     <div class="poll">
         <h1 class="text-xl font-medium">{poll.question}</h1>
-        {#if !authToken && !poll.hasVoted && poll.active}
+        {#if authToken === undefined}
             <p class="text-gray-700 font-light text-sm">Grant permissions to the extension to vote</p>
         {/if}
         <ul>
@@ -40,7 +43,7 @@
                 {@const percent = votePercents.get(option.value)}
                 <!-- TODO: dynamically load tailwind colors -->
                 <!--suppress HtmlWrongAttributeValue (it is wrong; svelte docs condone this)-->
-                <button class={poll.active ? 'pointer-events-auto' : ''} disabled={poll.hasVoted || !poll.active || !authToken} on:click={() => handleClick(i)} style={poll.hasVoted ? 'background: linear-gradient(90deg, rgba(253, 164, 175, .75) ' + percent + ', rgba(253, 164, 175, .25) ' + percent + ')' : ''}>
+                <button class={canVote ? 'pointer-events-auto' : ''} disabled={!canVote} on:click={() => handleClick(i)} style={poll.hasVoted ? 'background: linear-gradient(90deg, rgba(253, 164, 175, .75) ' + percent + ', rgba(253, 164, 175, .25) ' + percent + ')' : ''}>
                     {option.value}
                 </button>
             {/each}
