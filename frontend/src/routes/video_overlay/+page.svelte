@@ -23,15 +23,11 @@
         });
         // listen to pubsub for poll updates
         Twitch.ext.listen("broadcast", (target, contentType, message) => {
-            console.log("broadcast", target, contentType, message)
             if (contentType !== "application/json") {
                 return;
             }
-            console.log("goin")
             let data = JSON.parse(message);
-            console.log("yeehaw")
             if (data.status !== undefined && !data.status.error) {
-                console.log("oh yeah")
                 poll = data.status;
             }
         });
@@ -50,11 +46,13 @@
         //     poll = fullPlaceholderPoll;
         // }, 1000);
     });
+    let active: boolean;
+    $: active = poll.active || (dialogue_index > 0 && dialogue_index < dialogue.length);
 </script>
 
-<div id="transition" class="w-1/3 max-w-xs mx-auto fixed right-4 top-4 pointer-events-none" style="opacity: {poll.active ? '1' : '0'}; transform: {poll.active ? 'translateY(0)' : 'translateY(-100%)'}">
+<div id="transition" class="w-1/3 max-w-xs mx-auto fixed right-4 top-4 pointer-events-none" style="opacity: {active ? '1' : '0'}; transform: {active ? 'translateY(0)' : 'translateY(-100%)'}">
     {#if dialogue_index < dialogue.length}
-        <Dialogue index={dialogue_index} active={poll.active} next={next_dialogue} />
+        <Dialogue index={dialogue_index} active={active} next={next_dialogue} />
     {:else}
         <Poll {poll} {authToken} />
     {/if}

@@ -31,6 +31,7 @@ fun loadPoll(call: ApplicationCall): Pair<TwitchIncomingJWT, Poll?> {
 }
 
 suspend fun publish(channel: String, message: Map<String, *>): HttpResponse {
+    // todo put in map and then another thread grabs them and sends the newest one every second
     val jwt = TwitchOutgoingJWT(
         Date.from(Instant.now().plusSeconds(30)),
         System.getenv("TWITCH_CLIENT_ID"),

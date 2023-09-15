@@ -46,12 +46,15 @@
         //     poll = fullPlaceholderPoll;
         // }, 1000);
     });
+
+    let active: boolean;
+    $: active = poll.active || (dialogue_index > 0 && dialogue_index < dialogue.length);
 </script>
 
 <div class="full flex justify-center items-center bg-gradient-to-br from-rose-200 to-rose-300 pointer-events-none">
-    <div id="transition" class="w-full max-w-xs mx-auto transition-opacity" style="opacity: {poll.active ? '1' : '0'}; transform: {poll.active ? 'translateY(0)' : 'translateY(-100%)'}">
+    <div id="transition" class="w-full max-w-xs mx-auto transition-opacity" style="opacity: {active ? '1' : '0'}; transform: {active ? 'translateY(0)' : 'translateY(-100%)'}">
         {#if dialogue_index < dialogue.length}
-            <Dialogue index={dialogue_index} active={poll.active} next={next_dialogue} />
+            <Dialogue index={dialogue_index} active={active} next={next_dialogue} />
         {:else}
             <Poll {poll} {authToken} />
         {/if}
