@@ -1,6 +1,7 @@
 package dev.qixils.debut
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
 
 data class Poll(
     val question: String,
@@ -58,4 +59,16 @@ data class PollStatus(
     val winnerIndex: Int?,
     val active: Boolean,
     val hasVoted: Boolean,
-)
+) : JsonSerializable {
+    override fun toJson(): JsonElement {
+        return mapOf(
+            "question" to question,
+            "options" to options,
+            "totalVotes" to totalVotes,
+            "winner" to winner,
+            "winnerIndex" to winnerIndex,
+            "active" to active,
+            "hasVoted" to hasVoted,
+        ).toJsonElement()
+    }
+}

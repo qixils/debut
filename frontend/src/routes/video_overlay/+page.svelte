@@ -23,11 +23,15 @@
         });
         // listen to pubsub for poll updates
         Twitch.ext.listen("broadcast", (target, contentType, message) => {
+            console.log("broadcast", target, contentType, message)
             if (contentType !== "application/json") {
                 return;
             }
+            console.log("goin")
             let data = JSON.parse(message);
+            console.log("yeehaw")
             if (data.status !== undefined && !data.status.error) {
+                console.log("oh yeah")
                 poll = data.status;
             }
         });

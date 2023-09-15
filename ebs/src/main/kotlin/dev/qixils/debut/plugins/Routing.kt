@@ -15,6 +15,8 @@ import io.ktor.server.resources.Resources
 import io.ktor.server.resources.post
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import java.time.Instant
 import java.util.*
 import kotlin.collections.set
@@ -35,17 +37,21 @@ suspend fun publish(channel: String, message: Map<String, *>): HttpResponse {
         channel,
         PubsubPerms(send = listOf("broadcast"))
     )
-    return client.post("https://api.twitch.tv/helix/extensions/pubsub") {
+    val resp = client.post("https://api.twitch.tv/helix/extensions/pubsub") {
         contentType(ContentType.Application.Json)
         header("Client-Id", System.getenv("TWITCH_CLIENT_ID"))
         header("Authorization", "Bearer ${jwt.create()}")
         setBody(mapOf(
-            "target" to "broadcast",
+            "target" to listOf("broadcast"),
             "broadcaster_id" to channel,
             "is_global_broadcast" to false,
-            "message" to message,
+            "message" to Json.encodeToString(message.toJsonElement()),
         ))
     }
+    if (resp.status != HttpStatusCode.OK && resp.status != HttpStatusCode.NoContent) {
+        log.error("Failed to publish to Twitch: ${resp.status} ${resp.bodyAsText()}")
+    }
+    return resp
 }
 
 // routing
