@@ -14,18 +14,22 @@
         votePercents = votePercents; // svelte shenanigans
     }
 
-    function handleClick(optionIndex: number) {
+    async function handleClick(optionIndex: number) {
         if (!authToken) return;
         if (poll.hasVoted) return;
         if (optionIndex < 0 || optionIndex >= poll.options.length) return;
         const option = poll.options[optionIndex];
         option.votes++;
-        updateVotePercents();
         poll.hasVoted = true;
-        fetch('https://debut.qixils.dev/api/poll/vote?option=' + optionIndex, {
+        poll = poll; // svelte shenanigans
+        updateVotePercents();
+        let newPoll = await fetch('https://debut.qixils.dev/api/poll/vote?option=' + optionIndex, {
             method: 'POST',
             headers: {'Authorization': 'Bearer ' + authToken}
-        })
+        }).then(res => res.json());
+        if (newPoll && !newPoll.error) {
+            poll = newPoll;
+        }
     }
 
     let canVote: boolean;

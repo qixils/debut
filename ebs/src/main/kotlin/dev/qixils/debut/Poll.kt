@@ -2,11 +2,13 @@ package dev.qixils.debut
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
+import java.util.*
 
 data class Poll(
     val question: String,
     val options: List<String>,
 ) {
+    val id = UUID.randomUUID().toString()
     // map of user ID to option index
     private val votes: MutableMap<String, Int> = mutableMapOf()
     var active = true
@@ -31,6 +33,7 @@ data class Poll(
 
     fun status(requester: String? = null): PollStatus {
         return PollStatus(
+            id=id,
             question=question,
             options=options.mapIndexed { index, option ->
                 Option(option, votes.values.count { it == index })
@@ -59,6 +62,7 @@ data class Option(
 
 @Serializable
 data class PollStatus(
+    val id: String,
     val question: String,
     val options: List<Option>,
     val totalVotes: Int,
@@ -69,6 +73,7 @@ data class PollStatus(
 ) : JsonSerializable {
     override fun toJson(): JsonElement {
         return mapOf(
+            "id" to id,
             "question" to question,
             "options" to options,
             "totalVotes" to totalVotes,

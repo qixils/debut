@@ -4,6 +4,7 @@ export interface Option {
 }
 
 export interface PollStatus {
+    id: string;
     question: string;
     options: Option[];
     totalVotes: number;
@@ -22,6 +23,7 @@ export class PollPreset {
 }
 
 export let placeholderPoll: PollStatus = {
+    id: 'placeholder',
     question: 'Loading...',
     options: [],
     totalVotes: 0,
@@ -31,6 +33,7 @@ export let placeholderPoll: PollStatus = {
     hasVoted: true,
 }
 export let fullPlaceholderPoll: PollStatus = {
+    id: 'full-placeholder',
     question: 'placeholder',
     options: [{
         value: "option 1",

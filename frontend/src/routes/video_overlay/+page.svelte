@@ -28,6 +28,9 @@
             }
             let data = JSON.parse(message);
             if (data.status !== undefined && !data.status.error) {
+                if (poll && poll.id === data.status.id && poll.hasVoted) {
+                    data.status.hasVoted = true;
+                }
                 poll = data.status;
             }
         });
