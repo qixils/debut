@@ -6,7 +6,7 @@
     export let next: () => void;
 </script>
 
-<div class="bg-white/50 rounded-lg shadow-lg p-6 text-center">
+<div class="bg-rose-100/75 rounded-lg shadow-lg p-6 text-center">
     <div class="flex flex-col space-y-4">
         <p class="text-gray-700 text-sm">
             {#each dialogue[index][0].split("\n") as line, i}

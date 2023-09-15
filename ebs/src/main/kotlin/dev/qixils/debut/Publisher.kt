@@ -15,6 +15,8 @@ import kotlin.concurrent.thread
 val publications: MutableMap<Long, Map<String, *>> = mutableMapOf() // key is the streamer id
 
 private suspend fun publish(channel: String, message: Map<String, *>): HttpResponse {
+    val msg = Json.encodeToString(message.toJsonElement())
+    log.info("Publishing to $channel: $msg")
     val jwt = TwitchOutgoingJWT(
         Date.from(Instant.now().plusSeconds(30)),
         System.getenv("TWITCH_CLIENT_ID"),
@@ -29,7 +31,7 @@ private suspend fun publish(channel: String, message: Map<String, *>): HttpRespo
             "target" to listOf("broadcast"),
             "broadcaster_id" to channel,
             "is_global_broadcast" to false,
-            "message" to Json.encodeToString(message.toJsonElement()),
+            "message" to msg,
         ))
     }
     if (resp.status != HttpStatusCode.OK && resp.status != HttpStatusCode.NoContent) {
