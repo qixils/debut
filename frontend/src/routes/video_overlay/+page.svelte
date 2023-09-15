@@ -53,7 +53,7 @@
     $: active = poll.active || (dialogue_index > 0 && dialogue_index < dialogue.length);
 </script>
 
-<div id="transition" class="w-1/3 max-w-xs mx-auto fixed right-4 top-4 pointer-events-none" style="opacity: {active ? '1' : '0'}; transform: {active ? 'translateY(0)' : 'translateY(-100%)'}">
+<div id="transition" class="w-1/3 max-w-xs mx-auto fixed right-6 top-6 pointer-events-none" style="opacity: {active ? '1' : '0'}; transform: {active ? 'translateY(0)' : 'translateY(-100%)'}">
     {#if dialogue_index < dialogue.length}
         <Dialogue index={dialogue_index} active={active} next={next_dialogue} />
     {:else}

@@ -5,13 +5,11 @@
     export let authToken: string | undefined;
 
     let votePercents: Map<string, string> = new Map(poll.options.map(option => [option.value, '0%']));
-
-    function updateVotePercents() {
+    $: {
         const totalVotes = poll.options.reduce((total, option) => total + option.votes, 0);
         poll.options.forEach(option => {
             votePercents.set(option.value, Math.floor(totalVotes === 0 ? 0 : ((option.votes / totalVotes) * 100)) + '%');
         });
-        votePercents = votePercents; // svelte shenanigans
     }
 
     async function handleClick(optionIndex: number) {
@@ -22,7 +20,6 @@
         option.votes++;
         poll.hasVoted = true;
         poll = poll; // svelte shenanigans
-        updateVotePercents();
         let newPoll = await fetch('https://debut.qixils.dev/api/poll/vote?option=' + optionIndex, {
             method: 'POST',
             headers: {'Authorization': 'Bearer ' + authToken}
