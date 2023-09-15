@@ -48,7 +48,14 @@ data class Poll(
 data class Option(
     val value: String,
     val votes: Int,
-)
+) : JsonSerializable {
+    override fun toJson(): JsonElement {
+        return mapOf(
+            "value" to value,
+            "votes" to votes,
+        ).toJsonElement()
+    }
+}
 
 @Serializable
 data class PollStatus(

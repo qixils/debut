@@ -50,7 +50,7 @@
 
 <style lang="postcss">
     .poll {
-        @apply px-5 py-3 rounded-xl bg-rose-100/80 text-center w-full shadow shadow-rose-300/50 backdrop-blur backdrop-brightness-125;
+        @apply px-5 py-3 rounded-xl bg-rose-100/90 text-center w-full shadow shadow-rose-300/50 backdrop-blur backdrop-brightness-125;
     }
 
     button {
