@@ -19,6 +19,7 @@ fun Application.module() {
     configureMonitoring()
     configureSerialization()
     configureRouting()
+    startPublisher()
 }
 
 //val secret = this@configureSecurity.environment.config.property("jwt.secret").getString()

@@ -1,9 +1,10 @@
 
 package dev.qixils.debut.plugins
 
-import dev.qixils.debut.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
+import dev.qixils.debut.ErrorResponse
+import dev.qixils.debut.Poll
+import dev.qixils.debut.TwitchIncomingJWT
+import dev.qixils.debut.publications
 import io.ktor.http.*
 import io.ktor.resources.*
 import io.ktor.server.application.*
@@ -15,10 +16,6 @@ import io.ktor.server.resources.Resources
 import io.ktor.server.resources.post
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-import java.time.Instant
-import java.util.*
 import kotlin.collections.set
 
 // state
@@ -28,31 +25,6 @@ val polls: MutableMap<Long, Poll> = mutableMapOf() // key is the streamer id
 fun loadPoll(call: ApplicationCall): Pair<TwitchIncomingJWT, Poll?> {
     val payload = TwitchIncomingJWT.from(call.principal<JWTPrincipal>()!!.payload)
     return payload to polls[payload.channelId.toLong()]
-}
-
-suspend fun publish(channel: String, message: Map<String, *>): HttpResponse {
-    // todo put in map and then another thread grabs them and sends the newest one every second
-    val jwt = TwitchOutgoingJWT(
-        Date.from(Instant.now().plusSeconds(30)),
-        System.getenv("TWITCH_CLIENT_ID"),
-        channel,
-        PubsubPerms(send = listOf("broadcast"))
-    )
-    val resp = client.post("https://api.twitch.tv/helix/extensions/pubsub") {
-        contentType(ContentType.Application.Json)
-        header("Client-Id", System.getenv("TWITCH_CLIENT_ID"))
-        header("Authorization", "Bearer ${jwt.create()}")
-        setBody(mapOf(
-            "target" to listOf("broadcast"),
-            "broadcaster_id" to channel,
-            "is_global_broadcast" to false,
-            "message" to Json.encodeToString(message.toJsonElement()),
-        ))
-    }
-    if (resp.status != HttpStatusCode.OK && resp.status != HttpStatusCode.NoContent) {
-        log.error("Failed to publish to Twitch: ${resp.status} ${resp.bodyAsText()}")
-    }
-    return resp
 }
 
 // routing
@@ -81,10 +53,10 @@ fun Application.configureRouting() {
                     val poll = Poll(lines[0], lines.drop(1))
                     polls[payload.channelId.toLong()] = poll
                     // publish poll to twitch
-                    publish(payload.channelId, mapOf(
+                    publications[payload.channelId.toLong()] = mapOf(
                         "type" to "create",
                         "status" to poll.status(),
-                    ))
+                    )
                     // respond
                     call.respond(HttpStatusCode.OK, poll.status(payload.opaqueUserId))
                 }
@@ -104,10 +76,10 @@ fun Application.configureRouting() {
                         return@post
                     }
                     // publish vote to twitch
-                    publish(payload.channelId, mapOf(
+                    publications[payload.channelId.toLong()] = mapOf(
                         "type" to "vote",
                         "status" to poll.status(),
-                    ))
+                    )
                     // respond
                     call.respond(HttpStatusCode.OK, poll.status(payload.opaqueUserId))
                 }
@@ -132,10 +104,10 @@ fun Application.configureRouting() {
                         return@post
                     }
                     // publish closure to twitch
-                    publish(payload.channelId, mapOf(
+                    publications[payload.channelId.toLong()] = mapOf(
                         "type" to "close",
                         "status" to poll.status(),
-                    ))
+                    )
                     // respond
                     call.respond(HttpStatusCode.OK, poll.status(payload.opaqueUserId))
                 }
