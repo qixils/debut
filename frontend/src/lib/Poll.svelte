@@ -36,9 +36,11 @@
 <div id="container">
     <div class="poll">
         <h1 class="text-xl font-medium">{poll.question}</h1>
+        <!--
         {#if authToken === undefined}
             <p class="text-gray-700 font-light text-sm">Grant permissions to the extension to vote</p>
         {/if}
+        -->
         <ul>
             {#each poll.options as option, i}
                 {@const percent = votePercents.get(option.value)}

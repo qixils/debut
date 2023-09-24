@@ -14,6 +14,12 @@ export interface PollStatus {
     hasVoted: boolean;
 }
 
+export interface PollState {
+    time: number;
+    type: string;
+    status: PollStatus;
+}
+
 export interface ErrorResult {
     error: string;
 }
